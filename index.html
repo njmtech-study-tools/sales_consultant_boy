@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Assistant Chatbot — AI Portfolio Project</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    #hero-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    :root {
+      --bg:       #F7F6F3;
+      --surface:  #FFFFFF;
+      --border:   #E2E0DA;
+      --text:     #1A1916;
+      --muted:    #6B6860;
+      --subtle:   #EDECE8;
+      --ink:      #2C2A27;
+      --rule:     #D4D2CC;
+      --serif:    'DM Serif Display', Georgia, serif;
+      --sans:     'DM Sans', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ────────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2.5rem;
+      height: 56px;
+      background: rgba(247,246,243,0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .nav-links {
+      display: flex; gap: 2rem; list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.8rem; font-weight: 500;
+      color: var(--muted); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ───────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding-top: 56px;
+    }
+    .hero-left {
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 6rem 4rem 6rem 5rem;
+      border-right: 1px solid var(--border);
+    }
+    .hero-eyebrow {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .hero-eyebrow::before {
+      content: ''; display: block;
+      width: 28px; height: 1px; background: var(--muted);
+    }
+    .hero-title {
+      font-family: var(--serif);
+      font-size: clamp(2.8rem, 5vw, 4.2rem);
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 1.75rem;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--muted);
+    }
+    .hero-desc {
+      font-size: 1.05rem; font-weight: 300;
+      color: var(--muted); line-height: 1.75;
+      max-width: 38ch;
+      margin-bottom: 2.5rem;
+    }
+    .hero-tags {
+      display: flex; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .tag {
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--rule);
+      padding: 0.35rem 0.85rem;
+      border-radius: 2px;
+    }
+    .hero-right {
+      display: flex; align-items: center; justify-content: center;
+      padding: 4rem;
+      background: var(--subtle);
+      position: relative;
+      min-height: 500px;
+      overflow: hidden;
+    }
+    .hero-card-3d {
+      position: relative;
+      z-index: 10;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      max-width: 360px; width: 100%;
+      box-shadow: 0 10px 60px rgba(0,0,0,0.15);
+    }
+    .hero-card-label {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1.25rem;
+    }
+    .hero-card-stat {
+      font-family: var(--serif);
+      font-size: 2.4rem; color: var(--ink);
+      margin-bottom: 0.25rem;
+    }
+    .hero-card-sub {
+      font-size: 0.85rem; color: var(--muted);
+      font-weight: 300; margin-bottom: 2rem;
+    }
+    .divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+    .hero-card-row {
+      display: flex; justify-content: space-between;
+      font-size: 0.82rem; color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+    .hero-card-row span:last-child { color: var(--ink); font-weight: 500; }
+
+    /* ── SECTIONS ───────────────────────────────────────────── */
+    main { max-width: 1100px; margin: 0 auto; padding: 0 2.5rem 6rem; }
+
+    .section {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 3rem;
+      padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .section.visible { opacity: 1; transform: translateY(0); }
+
+    .section-meta { padding-top: 0.25rem; }
+    .section-num {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.5rem;
+    }
+    .section-title {
+      font-family: var(--serif);
+      font-size: 1.45rem; line-height: 1.25;
+      color: var(--ink);
+    }
+
+    .section-body { }
+    .section-body p {
+      font-size: 1rem; color: var(--ink);
+      font-weight: 300; line-height: 1.8;
+      margin-bottom: 1.25rem;
+    }
+    .section-body p strong { font-weight: 600; color: var(--ink); }
+
+    /* ── INFO BOX ───────────────────────────────────────────── */
+    .info-box {
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .info-box-label {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 0.9rem;
+    }
+    .info-list { list-style: none; }
+    .info-list li {
+      font-size: 0.95rem; color: var(--ink);
+      font-weight: 300; line-height: 1.7;
+      padding: 0.45rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: baseline; gap: 0.65rem;
+    }
+    .info-list li:last-child { border-bottom: none; }
+    .info-list li::before {
+      content: '—'; color: var(--rule);
+      font-weight: 400; flex-shrink: 0;
+    }
+    .info-list li strong { font-weight: 600; }
+
+    /* ── BULLET LIST ────────────────────────────────────────── */
+    .bullet-list { list-style: none; margin-bottom: 1.25rem; }
+    .bullet-list li {
+      font-size: 0.95rem; color: var(--ink);
+      font-weight: 300; line-height: 1.7;
+      padding: 0.35rem 0 0.35rem 1.25rem;
+      position: relative;
+    }
+    .bullet-list li::before {
+      content: ''; position: absolute; left: 0; top: 0.75rem;
+      width: 5px; height: 5px;
+      border: 1px solid var(--muted); border-radius: 50%;
+    }
+
+    /* ── TWO-COL CARDS ──────────────────────────────────────── */
+    .two-col {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+      background: var(--border); border: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+    .col-card {
+      background: var(--surface);
+      padding: 1.5rem 1.75rem;
+    }
+    .col-card-label {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 1rem;
+    }
+
+    /* ── STEPS ──────────────────────────────────────────────── */
+    .steps { display: flex; flex-direction: column; gap: 1px;
+      background: var(--border); border: 1px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .step {
+      display: grid; grid-template-columns: 52px 1fr;
+      background: var(--surface);
+    }
+    .step-num {
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 1.4rem;
+      font-family: var(--serif); font-size: 1.1rem;
+      color: var(--muted);
+      border-right: 1px solid var(--border);
+    }
+    .step-content { padding: 1.25rem 1.5rem; }
+    .step-title {
+      font-size: 0.82rem; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--ink); margin-bottom: 0.4rem;
+    }
+    .step-desc {
+      font-size: 0.93rem; color: var(--muted);
+      font-weight: 300; line-height: 1.65;
+    }
+    .step-desc em { font-style: italic; }
+
+    /* ── OPTIONAL FEATURES ──────────────────────────────────── */
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border);
+    }
+    .feature-item {
+      background: var(--subtle);
+      padding: 1.25rem 1.5rem;
+    }
+    .feature-icon {
+      font-size: 1.1rem; margin-bottom: 0.5rem;
+    }
+    .feature-name {
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--ink); margin-bottom: 0.3rem;
+    }
+    .feature-desc {
+      font-size: 0.82rem; color: var(--muted);
+      font-weight: 300; line-height: 1.5;
+    }
+
+    /* ── SUMMARY ────────────────────────────────────────────── */
+    .summary-block {
+      grid-column: 1 / -1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 3rem 4rem;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 3rem;
+      margin-top: 4rem;
+      opacity: 0; transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .summary-block.visible { opacity: 1; transform: translateY(0); }
+    .summary-label {
+      font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); padding-top: 0.25rem;
+    }
+    .summary-text {
+      font-family: var(--serif); font-size: 1.35rem;
+      line-height: 1.65; color: var(--ink);
+    }
+    .summary-text strong { font-style: italic; }
+
+    /* ── FOOTER ─────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 2.5rem;
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .footer-label {
+      font-size: 0.75rem; color: var(--muted);
+      font-weight: 400; letter-spacing: 0.04em;
+    }
+
+    /* ── FLOATING CHAT BUTTON ───────────────────────────────── */
+    .chat-fab {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
+      display: flex; align-items: center; gap: 0.6rem;
+      background: var(--ink); color: var(--surface);
+      border: none; border-radius: 2px;
+      padding: 0.75rem 1.25rem 0.75rem 1rem;
+      font-family: var(--sans); font-size: 0.82rem; font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .chat-fab:hover { opacity: 0.88; transform: translateY(-1px); }
+    .fab-icon-close { display: none; }
+    .chat-fab.open .fab-icon-chat { display: none; }
+    .chat-fab.open .fab-icon-close { display: block; }
+    .chat-fab.open .fab-label { display: none; }
+
+    /* ── POPUP CHATBOX ──────────────────────────────────────── */
+    .chat-popup {
+      position: fixed; bottom: 5rem; right: 1.5rem; z-index: 199;
+      width: 380px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+      display: flex; flex-direction: column;
+      transform: translateY(16px) scale(0.97);
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.22s ease, transform 0.22s ease;
+      transform-origin: bottom right;
+    }
+    .chat-popup.open {
+      opacity: 1; pointer-events: all;
+      transform: translateY(0) scale(1);
+    }
+
+    .cp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--subtle);
+    }
+    .cp-header-left { display: flex; align-items: center; gap: 0.65rem; }
+    .cp-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--rule); flex-shrink: 0;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    .cp-dot.active  { 
+      background: #6aaa6a; 
+      box-shadow: 0 0 8px rgba(106, 170, 106, 0.6);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    .cp-dot.loading { 
+      background: #c8a84b; 
+      box-shadow: 0 0 8px rgba(200, 168, 75, 0.6);
+      animation: pulse-glow 1s ease-in-out infinite; 
+    }
+    @keyframes pulse-glow { 
+      0%, 100% { 
+        box-shadow: 0 0 8px rgba(106, 170, 106, 0.6); 
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 14px rgba(106, 170, 106, 0.9); 
+        transform: scale(1.1);
+      }
+    }
+    .cp-title  { font-size: 0.85rem; font-weight: 600; color: var(--ink); }
+    .cp-subtitle { font-size: 0.72rem; color: var(--muted); font-weight: 300; margin-top: 1px; }
+    .cp-close {
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); padding: 4px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      border-radius: 4px;
+    }
+    .cp-close:hover { 
+      color: var(--ink); 
+      background: rgba(0,0,0,0.06);
+      transform: scale(1.1);
+    }
+
+    .cp-scenarios {
+      display: flex; flex-wrap: wrap; gap: 0.4rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .cp-pill {
+      font-family: var(--sans); font-size: 0.75rem; font-weight: 500;
+      color: var(--muted); background: var(--bg);
+      border: 1px solid var(--border); border-radius: 2px;
+      padding: 0.3rem 0.7rem; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cp-pill:hover { 
+      border-color: var(--ink); 
+      color: var(--ink); 
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .cp-pill.active { 
+      background: var(--ink); 
+      color: var(--surface); 
+      border-color: var(--ink); 
+      box-shadow: 0 2px 8px rgba(44, 42, 39, 0.3);
+    }
+    .cp-pill.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+    .cp-messages {
+      flex: 1; overflow-y: auto;
+      padding: 1rem;
+      min-height: 180px; max-height: 260px;
+      display: flex; flex-direction: column; gap: 0.85rem;
+    }
+    .cp-intro {
+      font-size: 0.85rem; color: var(--muted); font-weight: 300;
+      line-height: 1.6; text-align: center; margin: auto;
+    }
+    .cp-bubble-wrap { display: flex; flex-direction: column; gap: 0.25rem; }
+    .cp-bubble-label {
+      font-size: 0.65rem; font-weight: 600;
+      letter-spacing: 0.07em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .cp-bubble-label.user-lbl { text-align: right; }
+    .cp-bubble {
+      font-size: 0.87rem; line-height: 1.6; font-weight: 300;
+      padding: 0.7rem 0.9rem; border-radius: 2px;
+      max-width: 90%;
+    }
+    .cp-bubble.user {
+      background: var(--ink); color: var(--surface);
+      align-self: flex-end;
+    }
+    .cp-bubble.assistant {
+      background: var(--subtle); border: 1px solid var(--border);
+      color: var(--ink); align-self: flex-start;
+    }
+    .cp-typing {
+      display: flex; gap: 4px; align-items: center;
+      padding: 0.7rem 0.9rem;
+      background: var(--subtle); border: 1px solid var(--border);
+      max-width: 64px; border-radius: 2px; align-self: flex-start;
+    }
+    .cp-typing span {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: var(--muted); animation: bounce 1.2s infinite;
+    }
+    .cp-typing span:nth-child(2) { animation-delay: 0.2s; }
+    .cp-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    .cp-footer {
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      display: flex; gap: 0.75rem; align-items: center;
+      background: var(--subtle);
+    }
+    .cp-preview {
+      flex: 1; font-size: 0.78rem; color: var(--muted);
+      font-weight: 300; line-height: 1.45; font-style: italic;
+    }
+    .cp-send {
+      font-family: var(--sans); font-size: 0.8rem; font-weight: 600;
+      color: var(--surface); background: var(--ink);
+      border: none; padding: 0.55rem 1.1rem;
+      cursor: pointer; border-radius: 2px; white-space: nowrap;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .cp-send:hover { 
+      opacity: 0.9; 
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(44, 42, 39, 0.3);
+    }
+    .cp-send:active {
+      transform: translateY(0);
+    }
+    .cp-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    @media (max-width: 480px) {
+      .chat-popup { left: 1rem; right: 1rem; width: auto; }
+      .chat-fab { right: 1rem; left: auto; bottom: 1.5rem; }
+    }
+
+    /* ── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-right { display: none; }
+      .hero-left { padding: 4rem 2rem; }
+      .section { grid-template-columns: 1fr; gap: 1.5rem; padding: 3rem 0; }
+      .two-col { grid-template-columns: 1fr; }
+      .feature-grid { grid-template-columns: 1fr; }
+      .summary-block { grid-template-columns: 1fr; gap: 1rem; padding: 2rem; }
+      nav { padding: 0 1.5rem; }
+      .nav-links { display: none; }
+      main { padding: 0 1.5rem 4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <span class="nav-label">AI Portfolio Project</span>
+    <ul class="nav-links">
+      <li><a href="#customer">Customer</a></li>
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#proposal">Proposal</a></li>
+      <li><a href="#how">How it works</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">AI Portfolio Project</p>
+      <h1 class="hero-title">Sales Assistant<br><em>Chatbot</em></h1>
+      <p class="hero-desc">
+        Giving Sales Consultants instant, intelligent support to close deals faster
+        and deliver consistent customer experiences.
+      </p>
+      <div class="hero-tags">
+        <span class="tag">Real-Time AI</span>
+        <span class="tag">Sales Enablement</span>
+        <span class="tag">Consistent Messaging</span>
+        <span class="tag">CRM Integration</span>
+      </div>
+    </div>
+    <div class="hero-right">
+      <canvas id="hero-canvas"></canvas>
+      <div class="hero-card-3d">
+        <p class="hero-card-label">Project at a glance</p>
+        <p class="hero-card-stat">3</p>
+        <p class="hero-card-sub">Stakeholder groups impacted</p>
+        <div class="divider"></div>
+        <div class="hero-card-row">
+          <span>Primary user</span>
+          <span>Sales Consultant</span>
+        </div>
+        <div class="hero-card-row">
+          <span>Delivery</span>
+          <span>AI Chatbot</span>
+        </div>
+        <div class="hero-card-row">
+          <span>Integration</span>
+          <span>Sales workflow + CRM</span>
+        </div>
+        <div class="hero-card-row">
+          <span>Key benefit</span>
+          <span>Faster, consistent sales</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- 01 Customer -->
+    <div class="section" id="customer">
+      <div class="section-meta">
+        <p class="section-num">01</p>
+        <h2 class="section-title">Who is the customer?</h2>
+      </div>
+      <div class="section-body">
+        <p>
+          The primary customers are <strong>Sales Consultants</strong> working in retail,
+          service-based businesses, or B2B environments.
+          These are individuals responsible for engaging customers, answering questions,
+          and closing deals.
+        </p>
+      </div>
+    </div>
+
+    <!-- 02 Affected -->
+    <div class="section">
+      <div class="section-meta">
+        <p class="section-num">02</p>
+        <h2 class="section-title">Who is affected?</h2>
+      </div>
+      <div class="section-body">
+        <div class="info-box">
+          <p class="info-box-label">Stakeholders</p>
+          <ul class="info-list">
+            <li><span><strong>Sales Consultants</strong> — direct users of the tool</span></li>
+            <li><span><strong>Sales Managers</strong> — performance tracking &amp; revenue oversight</span></li>
+            <li><span><strong>Customers</strong> — end-users receiving faster, better service</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 Problem -->
+    <div class="section" id="problem">
+      <div class="section-meta">
+        <p class="section-num">03</p>
+        <h2 class="section-title">Customer problem or opportunity</h2>
+      </div>
+      <div class="section-body">
+        <p>Sales Consultants often:</p>
+        <ul class="bullet-list">
+          <li>Struggle to remember detailed product information</li>
+          <li>Take too long to respond to customer queries</li>
+          <li>Miss sales opportunities due to lack of real-time insights</li>
+          <li>Deliver inconsistent messaging across customers</li>
+        </ul>
+        <div class="info-box">
+          <p class="info-box-label">Opportunity</p>
+          <p style="font-size:0.95rem;color:var(--ink);font-weight:300;line-height:1.75;">
+            Improve sales performance by giving consultants instant, intelligent support
+            during every customer interaction.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 Proposal -->
+    <div class="section" id="proposal">
+      <div class="section-meta">
+        <p class="section-num">04</p>
+        <h2 class="section-title">What are you proposing to launch?</h2>
+      </div>
+      <div class="section-body">
+        <p>
+          A <strong>Sales Assistant Chatbot</strong> powered by AI — acting as a
+          <strong>real-time assistant</strong> that helps Sales Consultants:
+        </p>
+        <ul class="bullet-list">
+          <li>Answer customer questions instantly</li>
+          <li>Recommend products and services</li>
+          <li>Handle objections confidently</li>
+          <li>Generate persuasive, on-brand responses</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 05 Why -->
+    <div class="section">
+      <div class="section-meta">
+        <p class="section-num">05</p>
+        <h2 class="section-title">Why does the customer need this?</h2>
+      </div>
+      <div class="section-body">
+        <div class="two-col">
+          <div class="col-card">
+            <p class="col-card-label">For Sales Consultants</p>
+            <ul class="bullet-list">
+              <li>Sell faster and more confidently</li>
+              <li>Reduce mental load</li>
+              <li>Provide accurate, consistent information</li>
+              <li>Increase conversion rates and commissions</li>
+            </ul>
+          </div>
+          <div class="col-card">
+            <p class="col-card-label">For Businesses</p>
+            <ul class="bullet-list">
+              <li>Improved customer experience</li>
+              <li>Increased revenue</li>
+              <li>Reduced training time for new hires</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 06 How -->
+    <div class="section" id="how">
+      <div class="section-meta">
+        <p class="section-num">06</p>
+        <h2 class="section-title">How does it work?</h2>
+      </div>
+      <div class="section-body">
+        <p>The chatbot operates as an <strong>AI-powered assistant integrated into the sales workflow</strong>:</p>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <p class="step-title">Input</p>
+              <p class="step-desc">The Sales Consultant inputs a customer question or scenario — e.g., <em>"Customer wants a cheaper alternative."</em></p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <p class="step-title">Processing</p>
+              <p class="step-desc">The chatbot processes the request using trained data: product knowledge, sales scripts, and customer behaviour patterns.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <p class="step-title">Response Generation</p>
+              <p class="step-desc">It generates a smart response — a suggested reply, product recommendation, or upsell / cross-sell strategy.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <p class="step-title">Real-Time Action</p>
+              <p class="step-desc">The consultant uses or adapts the response in real-time during the customer interaction.</p>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:0.82rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Optional advanced features</p>
+        <div class="feature-grid">
+          <div class="feature-item">
+            <div class="feature-icon">🎙</div>
+            <p class="feature-name">Voice-to-Text</p>
+            <p class="feature-desc">Capture live conversations hands-free during customer interactions.</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🗂</div>
+            <p class="feature-name">CRM Integration</p>
+            <p class="feature-desc">Pull customer history and preferences for personalised responses.</p>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📈</div>
+            <p class="feature-name">Performance Feedback</p>
+            <p class="feature-desc">Suggest better sales techniques over time based on outcomes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-block">
+      <p class="summary-label">Summary</p>
+      <p class="summary-text">
+        Sales Consultants are under pressure to respond quickly and close deals,
+        but they don't always have the right information at the right time.
+        This AI Sales Assistant Chatbot gives them
+        <strong>instant, intelligent support</strong> — helping them communicate better,
+        sell more effectively, and deliver a consistent customer experience.
+      </p>
+    </div>
+
+  </main>
+
+  <footer>
+    <span class="footer-label">AI Portfolio Project &nbsp;·&nbsp; Sales Assistant Chatbot</span>
+    <span class="footer-label">Confidential</span>
+  </footer>
+
+  <!-- ── FLOATING CHAT ─────────────────────────────────────── -->
+  <div id="chat-popup" class="chat-popup" aria-hidden="true">
+    <div class="cp-header">
+      <div class="cp-header-left">
+        <div class="cp-dot" id="cp-dot"></div>
+        <div>
+          <div class="cp-title">Sales Assistant</div>
+          <div class="cp-subtitle" id="cp-subtitle">Pick a scenario to begin</div>
+        </div>
+      </div>
+      <button class="cp-close" onclick="toggleChat()" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="cp-scenarios">
+      <button class="cp-pill active" data-q="A customer says our product is too expensive compared to competitors. How should I respond?">💸 Price objection</button>
+      <button class="cp-pill" data-q="A customer is interested but keeps saying they need to think about it and won't commit. What should I say to move things forward?">⏳ Stalling customer</button>
+      <button class="cp-pill" data-q="I just closed a sale on a mid-range laptop. What related products or services should I recommend to upsell or cross-sell?">📦 Upsell opportunity</button>
+    </div>
+
+    <div class="cp-messages" id="cp-messages">
+      <div class="cp-intro">Choose a scenario above, then hit <strong>Ask</strong>.</div>
+    </div>
+
+    <div class="cp-footer">
+      <div class="cp-preview" id="cp-preview">A customer says our product is too expensive compared to competitors. How should I respond?</div>
+      <button class="cp-send" id="cp-send-btn" onclick="cpAsk()">Ask →</button>
+    </div>
+  </div>
+
+  <!-- Floating trigger button -->
+  <button class="chat-fab" id="chat-fab" onclick="toggleChat()" aria-label="Open Sales Assistant">
+    <svg class="fab-icon-chat" width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+    </svg>
+    <svg class="fab-icon-close" width="16" height="16" viewBox="0 0 14 14" fill="none">
+      <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+    </svg>
+    <span class="fab-label">Try the assistant</span>
+  </button>
+
+  <script>
+    // ── Scroll reveal ────────────────────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.section, .summary-block').forEach(el => observer.observe(el));
+
+    // ── Chat popup toggle ────────────────────────────────────
+    let chatOpen = false;
+    function toggleChat() {
+      chatOpen = !chatOpen;
+      document.getElementById('chat-popup').classList.toggle('open', chatOpen);
+      document.getElementById('chat-fab').classList.toggle('open', chatOpen);
+    }
+
+    // ── Scenario pills ───────────────────────────────────────
+    let currentQ = document.querySelector('.cp-pill.active').dataset.q;
+    const askedQuestions = new Set();
+
+    document.querySelectorAll('.cp-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        if (pill.classList.contains('disabled')) return;
+        document.querySelectorAll('.cp-pill').forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        currentQ = pill.dataset.q;
+        document.getElementById('cp-preview').textContent = currentQ;
+      });
+    });
+
+    // ── Chat helpers ─────────────────────────────────────────
+    function cpAppend(role, text) {
+      const box = document.getElementById('cp-messages');
+      const intro = box.querySelector('.cp-intro');
+      if (intro) intro.remove();
+
+      const wrap = document.createElement('div');
+      wrap.className = 'cp-bubble-wrap';
+
+      const lbl = document.createElement('div');
+      lbl.className = 'cp-bubble-label' + (role === 'user' ? ' user-lbl' : '');
+      lbl.textContent = role === 'user' ? 'You (Consultant)' : 'Sales Assistant';
+
+      const bubble = document.createElement('div');
+      bubble.className = 'cp-bubble ' + role;
+      bubble.textContent = text;
+
+      wrap.appendChild(lbl);
+      wrap.appendChild(bubble);
+      box.appendChild(wrap);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function cpShowTyping() {
+      const box = document.getElementById('cp-messages');
+      const wrap = document.createElement('div');
+      wrap.id = 'cp-typing';
+      wrap.className = 'cp-bubble-wrap';
+
+      const lbl = document.createElement('div');
+      lbl.className = 'cp-bubble-label';
+      lbl.textContent = 'Sales Assistant';
+
+      const dot = document.createElement('div');
+      dot.className = 'cp-typing';
+      dot.innerHTML = '<span></span><span></span><span></span>';
+
+      wrap.appendChild(lbl);
+      wrap.appendChild(dot);
+      box.appendChild(wrap);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function cpRemoveTyping() {
+      const t = document.getElementById('cp-typing');
+      if (t) t.remove();
+    }
+
+    function cpSetStatus(text, mode) {
+      document.getElementById('cp-subtitle').textContent = text;
+      const dot = document.getElementById('cp-dot');
+      dot.className = 'cp-dot' + (mode ? ' ' + mode : '');
+    }
+
+    // ── Sound Effects ───────────────────────────────
+    const chatAudio = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      },
+      playSend() {
+        this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        
+        const now = this.ctx.currentTime;
+        const oscillator = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        oscillator.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        oscillator.frequency.setValueAtTime(587, now); // D5
+        oscillator.frequency.setValueAtTime(784, now + 0.08); // G5
+        oscillator.type = 'sine';
+        
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.15);
+      },
+      playReceive() {
+        this.init();
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        
+        const now = this.ctx.currentTime;
+        const oscillator = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        
+        oscillator.connect(gain);
+        gain.connect(this.ctx.destination);
+        
+        oscillator.frequency.setValueAtTime(523, now); // C5
+        oscillator.frequency.setValueAtTime(659, now + 0.1); // E5
+        oscillator.type = 'sine';
+        
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        
+        oscillator.start(now);
+        oscillator.stop(now + 0.2);
+      }
+    };
+
+    // ── Preconfigured Answers ───────────────────────────────
+    const responses = {
+      "A customer says our product is too expensive compared to competitors. How should I respond?": 
+        "Acknowledge the price concern first to show you're listening. Instead of defending the cost, pivot to the unique value and long-term ROI they won't get elsewhere. Ask what specific features are most important to them to refocus the conversation on value rather than just the number.",
+      
+      "A customer is interested but keeps saying they need to think about it and won't commit. What should I say to move things forward?": 
+        "Respect their need for time, but try to identify the specific hurdle by asking, 'What part of the proposal are you most concerned about?' Offer a low-pressure next step, like a brief follow-up call or a specific case study. This keeps the momentum alive without being pushy.",
+      
+      "I just closed a sale on a mid-range laptop. What related products or services should I recommend to upsell or cross-sell?": 
+        "Since they just invested in a mid-range laptop, suggest a high-quality protective sleeve or a docking station to enhance their workspace. Mentioning an extended warranty or a discounted software bundle at the point of sale is also highly effective. Focus on how these additions protect their new investment."
+    };
+
+    // ── Ask with Local Answers ───────────────────────────────
+    async function cpAsk() {
+      const btn = document.getElementById('cp-send-btn');
+      btn.disabled = true;
+      cpSetStatus('Thinking…', 'loading');
+      cpAppend('user', currentQ);
+      chatAudio.playSend();
+      cpShowTyping();
+
+      // Disable the current pill after asking
+      document.querySelectorAll('.cp-pill').forEach(pill => {
+        if (pill.dataset.q === currentQ) {
+          pill.classList.add('disabled');
+          askedQuestions.add(currentQ);
+        }
+      });
+
+      // Simulate a brief delay for a more natural feel
+      setTimeout(() => {
+        cpRemoveTyping();
+        const reply = responses[currentQ] || "I'm not sure how to help with that specific scenario yet.";
+        cpAppend('assistant', reply);
+        chatAudio.playReceive();
+        cpSetStatus('Ready', 'active');
+        btn.disabled = false;
+
+        // Select next available pill
+        const nextPill = Array.from(document.querySelectorAll('.cp-pill'))
+          .find(p => !p.classList.contains('disabled'));
+        if (nextPill) {
+          nextPill.click();
+        } else {
+          document.getElementById('cp-preview').textContent = 'All scenarios answered!';
+          document.getElementById('cp-subtitle').textContent = 'Refresh to restart';
+        }
+      }, 1000);
+    }
+
+    // ── Three.js 3D Hero Scene ───────────────────────────────
+    (function() {
+      const canvas = document.getElementById('hero-canvas');
+      if (!canvas) return;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+      camera.position.z = 8;
+
+      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(5, 5, 5);
+      scene.add(directionalLight);
+
+      const pointLight = new THREE.PointLight(0x6a8caf, 0.5);
+      pointLight.position.set(-3, 2, 3);
+      scene.add(pointLight);
+
+      // Load the SVG image texture
+      const textureLoader = new THREE.TextureLoader();
+      const imageUrl = 'https://res.cloudinary.com/dfta3fn6p/image/upload/v1676064224/public/assets/Saly-13_kwjz95.svg';
+      
+      const sprites = [];
+      const numSprites = 4;
+      const orbitRadius = 3.2;
+      let baseRotation = 0;
+
+      textureLoader.load(imageUrl, function(texture) {
+        const spriteMaterial = new THREE.SpriteMaterial({ 
+          map: texture, 
+          color: 0xffffff,
+          transparent: true
+        });
+
+        // Create 4 sprites in diamond formation
+        for (let i = 0; i < numSprites; i++) {
+          const sprite = new THREE.Sprite(spriteMaterial.clone());
+          sprite.scale.set(1.2, 1.2, 1);
+          
+          const angle = (i / numSprites) * Math.PI * 2;
+          sprite.userData = { 
+            baseAngle: angle,
+            yOffset: (i % 2 === 0 ? 1 : -1) * 0.3
+          };
+          
+          scene.add(sprite);
+          sprites.push(sprite);
+        }
+      });
+
+      // Mouse drag interaction
+      let isDragging = false;
+      let previousMouseX = 0;
+      let rotationVelocity = 0.003; // Auto-rotation speed
+      const autoRotationSpeed = 0.003;
+
+      canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        previousMouseX = e.clientX;
+        canvas.style.cursor = 'grabbing';
+      });
+
+      canvas.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        
+        const deltaX = e.clientX - previousMouseX;
+        previousMouseX = e.clientX;
+        
+        // Rotate counter-clockwise when dragging right, clockwise when dragging left
+        baseRotation -= deltaX * 0.005;
+        rotationVelocity = -deltaX * 0.0002;
+      });
+
+      canvas.addEventListener('mouseup', () => {
+        isDragging = false;
+        canvas.style.cursor = 'grab';
+      });
+
+      canvas.addEventListener('mouseleave', () => {
+        isDragging = false;
+        canvas.style.cursor = 'default';
+      });
+
+      canvas.addEventListener('mouseenter', () => {
+        if (!isDragging) canvas.style.cursor = 'grab';
+      });
+
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Apply rotation to all sprites
+        sprites.forEach((sprite, index) => {
+          const angle = sprite.userData.baseAngle + baseRotation;
+          
+          const x = Math.cos(angle) * orbitRadius;
+          const z = Math.sin(angle) * orbitRadius;
+          const y = sprite.userData.yOffset + Math.sin(angle * 2) * 0.2;
+          
+          sprite.position.set(x, y, z);
+          sprite.lookAt(camera.position);
+        });
+
+        // Always rotate, but user can speed up/slow down by dragging
+        if (isDragging) {
+          // Decay velocity back to auto-rotation speed
+          rotationVelocity += (autoRotationSpeed - rotationVelocity) * 0.05;
+        } else {
+          // Return to auto-rotation speed
+          rotationVelocity += (autoRotationSpeed - rotationVelocity) * 0.02;
+        }
+        baseRotation += rotationVelocity;
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      // Handle resize
+      window.addEventListener('resize', () => {
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+      });
+    })();
+  </script>
+
+</body>
+</html>
